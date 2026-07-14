@@ -1,0 +1,29 @@
+# Secrets — never commit these
+.env
+*.env
+!.env.example
+
+# Python
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.pytest_cache/
+
+# Logs
+server.log
+*.log
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# spaCy model cache (if downloaded locally instead of via pip)
+*.whl
