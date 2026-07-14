@@ -1,81 +1,99 @@
-# Redactive — DLP Classifier API (Step 3: Regex + NER + LLM Layers)
+# Redactive — DLP Classifier API (Step 4: Combine + Redact)
 
 An LLM-powered Data Loss Prevention classifier, built in layers.
-All three core guards are now wired together.
+Findings from all three guards now get merged, deduplicated, and used to
+produce a redacted version of the input text — not just a list of what's risky.
 
 ## What's here
 
 ```
 app/
-  main.py                 -> FastAPI app (Redactive), /analyze and /health endpoints
-  config.py                -> loads ANTHROPIC_API_KEY and model name from .env
+  main.py                 -> FastAPI app (Redactive), /analyze and /health
+  config.py                -> loads GROQ_API_KEY and model name from .env
+  models/
+    schemas.py              -> shared request/response models
   guards/
-    regex_guard.py         -> Guard 1: pattern matching for SSN, credit cards,
-                               emails, phone numbers, AWS keys, generic API
-                               keys, IPv4 addresses
-    ner_guard.py            -> Guard 2: spaCy NER for names, orgs, locations,
-                               money mentions, nationalities/groups
-    llm_guard.py             -> Guard 3: Claude reviews the whole message for
-                               context-dependent risk, returns a risk score,
-                               a plain-English explanation, and flagged phrases
+    regex_guard.py          -> Guard 1: pattern matching (SSN, credit cards,
+                                emails, phone numbers, AWS keys, IPv4, etc.)
+    ner_guard.py             -> Guard 2: spaCy NER (names, orgs, locations,
+                                money mentions, nationalities/groups)
+    llm_guard.py              -> Guard 3: Groq LLM contextual review — risk
+                                score, plain-English explanation, flagged phrases
+  pipeline/
+    combine.py                 -> merges + deduplicates findings across guards
+  redaction/
+    redactor.py                  -> builds a redacted version of the text
 requirements.txt
 .env.example
 ```
 
-## Install (new for Step 3)
+## Install
+
+No new dependencies for Step 4 — same install as Step 3:
 
 ```bash
 pip install --only-binary :all: -r requirements.txt
 ```
 
-This adds `openai` (client library — used to call Groq, since Groq's API is
-OpenAI-SDK-compatible) and `python-dotenv` (loads your API key from a `.env`
-file) on top of everything from Steps 1-2.
-
 ## Set up your API key (Groq — free, no credit card)
 
 1. Copy `.env.example` to a new file named `.env` in the project root
-2. Get a free key at https://console.groq.com/keys (sign up with email/Google, no card needed)
+2. Get a free key at https://console.groq.com/keys
 3. Paste it in: `GROQ_API_KEY=gsk_...`
 
-Groq's free tier is generous (thousands of requests/day on Llama 3.3 70B),
-more than enough for building and testing this project. The code is written
-so swapping to Anthropic's Claude API later only means changing the client
-setup inside `llm_guard.py` — nothing else in the pipeline needs to change.
-
 **Without a key set, the app still runs fine** — the LLM guard returns
-`"enabled": false` and an explanation instead of crashing, so regex and NER
-keep working on their own. This was tested deliberately so the pipeline
-degrades gracefully rather than failing hard.
+`"enabled": false` and an explanation instead of crashing, so regex + NER
++ redaction keep working on their own.
 
 ## Run it locally
 
 ```bash
-uvicorn app.main:app --reload
+python -m uvicorn app.main:app --reload
 ```
 
-Visit http://localhost:8000/docs and test `/analyze` with something like:
+Visit http://localhost:8000/docs and test `/analyze`:
 
 ```json
-{"text": "Our Q3 revenue is $4.2M, please don't share this outside the team."}
+{"text": "My SSN is 123-45-6789 and I work with Rohan Mehta at Skyhigh Security."}
 ```
 
-Notice this sentence has **no SSN, no email, no obvious pattern** — regex
-and NER alone would barely flag it. The LLM layer is what catches that this
-is confidential information paired with an instruction to keep it secret,
-and explains why in plain English in the `llm_review` field of the response.
+## What's new in Step 4
 
-## How the risk score works now
+The response now includes `redacted_text` — a safe version of the input
+with every flagged span replaced by a labeled placeholder:
 
-`risk_score` = (sum of regex + NER severities) + (LLM's own risk_score),
-capped at 100. The LLM's score is judged independently based on context,
-so it can flag something as risky even when regex/NER found nothing at all.
+```json
+{
+  "original_text": "My SSN is 123-45-6789 and I work with Rohan Mehta at Skyhigh Security.",
+  "redacted_text": "My [REDACTED_ORG] is [REDACTED_SSN] and I work with [REDACTED_PERSON] at [REDACTED_ORG].",
+  "findings": [...],
+  "risk_score": 75,
+  "layers_used": ["regex", "ner", "llm"],
+  "llm_review": {...}
+}
+```
+
+Two things worth understanding about how this works:
+
+- **`combine.py`** deduplicates overlapping findings from different guards
+  (e.g. if regex and NER both flag overlapping spans, the higher-severity
+  finding wins and the other is dropped) before anything gets redacted.
+- **`redactor.py`** replaces spans starting from the end of the string
+  backward, so earlier replacements don't shift the character positions
+  of findings still waiting to be redacted.
+
+**Known limitation worth knowing about:** you may notice the word "SSN"
+itself sometimes gets misread by the NER model as an organization name
+(`ner_org`) and gets redacted too, producing slightly odd output like
+`"My [REDACTED_ORG] is [REDACTED_SSN]..."`. This is a real spaCy false
+positive, not a bug in the redaction logic — and it's a good concrete
+example to have on hand when you build the evasion/false-positive report
+in a later step.
 
 ## What's next
 
 - Cascade logic: only call the LLM when regex/NER already found something
-  borderline, to save cost and latency (right now the LLM runs on every
-  request, which works but isn't optimized yet)
+  borderline, to save cost and latency
 - Adversarial evasion test suite: systematically try to fool the classifier
   with obfuscated inputs, measure detection rate per layer
 - Deploy to Render/Railway, add API key auth
