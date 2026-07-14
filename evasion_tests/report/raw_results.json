@@ -1,0 +1,522 @@
+[
+  {
+    "test_case": "SSN",
+    "technique": "baseline (no obfuscation)",
+    "text_sent": "My social security number is 123-45-6789, please keep it safe.",
+    "detected": true,
+    "layers_fired": [
+      "llm",
+      "regex"
+    ],
+    "risk_score": 100
+  },
+  {
+    "test_case": "SSN",
+    "technique": "spaced_out",
+    "text_sent": "My social security number is 1 2 3 - 4 5 - 6 7 8 9, please keep it safe.",
+    "detected": true,
+    "layers_fired": [
+      "llm"
+    ],
+    "risk_score": 100
+  },
+  {
+    "test_case": "SSN",
+    "technique": "leetspeak",
+    "text_sent": "My social security number is 123-45-6789, please keep it safe.",
+    "detected": true,
+    "layers_fired": [
+      "llm",
+      "regex"
+    ],
+    "risk_score": 100
+  },
+  {
+    "test_case": "SSN",
+    "technique": "dashes_to_dots",
+    "text_sent": "My social security number is 123.45.6789, please keep it safe.",
+    "detected": true,
+    "layers_fired": [
+      "llm"
+    ],
+    "risk_score": 100
+  },
+  {
+    "test_case": "SSN",
+    "technique": "dashes_removed",
+    "text_sent": "My social security number is 123456789, please keep it safe.",
+    "detected": true,
+    "layers_fired": [
+      "llm"
+    ],
+    "risk_score": 100
+  },
+  {
+    "test_case": "SSN",
+    "technique": "reversed_text",
+    "text_sent": "My social security number is 9876-54-321, please keep it safe.",
+    "detected": true,
+    "layers_fired": [
+      "llm"
+    ],
+    "risk_score": 100
+  },
+  {
+    "test_case": "SSN",
+    "technique": "base64_encoded",
+    "text_sent": "My social security number is here's the value encoded: MTIzLTQ1LTY3ODk=, please keep it safe.",
+    "detected": true,
+    "layers_fired": [
+      "llm"
+    ],
+    "risk_score": 100
+  },
+  {
+    "test_case": "SSN",
+    "technique": "homoglyph_substitution",
+    "text_sent": "My social security number is 123-45-6789, please keep it safe.",
+    "detected": true,
+    "layers_fired": [
+      "llm",
+      "regex"
+    ],
+    "risk_score": 100
+  },
+  {
+    "test_case": "SSN",
+    "technique": "zero_width_injection",
+    "text_sent": "My social security number is 1\u200b2\u200b3\u200b-\u200b4\u200b5\u200b-\u200b6\u200b7\u200b8\u200b9, please keep it safe.",
+    "detected": true,
+    "layers_fired": [
+      "llm"
+    ],
+    "risk_score": 100
+  },
+  {
+    "test_case": "SSN",
+    "technique": "split_across_sentence",
+    "text_sent": "My social security number is , please keep it safe. first part is 123-4, and separately, the rest is 5-6789",
+    "detected": true,
+    "layers_fired": [
+      "llm"
+    ],
+    "risk_score": 100
+  },
+  {
+    "test_case": "email",
+    "technique": "baseline (no obfuscation)",
+    "text_sent": "You can reach me at farha@example.com for anything urgent.",
+    "detected": true,
+    "layers_fired": [
+      "regex"
+    ],
+    "risk_score": 10
+  },
+  {
+    "test_case": "email",
+    "technique": "spaced_out",
+    "text_sent": "You can reach me at f a r h a @ e x a m p l e . c o m for anything urgent.",
+    "detected": false,
+    "layers_fired": [],
+    "risk_score": 0
+  },
+  {
+    "test_case": "email",
+    "technique": "leetspeak",
+    "text_sent": "You can reach me at f4rh4@3x4mpl3.c0m for anything urgent.",
+    "detected": true,
+    "layers_fired": [
+      "llm",
+      "regex"
+    ],
+    "risk_score": 100
+  },
+  {
+    "test_case": "email",
+    "technique": "dashes_to_dots",
+    "text_sent": "You can reach me at farha@example.com for anything urgent.",
+    "detected": true,
+    "layers_fired": [
+      "regex"
+    ],
+    "risk_score": 10
+  },
+  {
+    "test_case": "email",
+    "technique": "dashes_removed",
+    "text_sent": "You can reach me at farha@example.com for anything urgent.",
+    "detected": true,
+    "layers_fired": [
+      "regex"
+    ],
+    "risk_score": 10
+  },
+  {
+    "test_case": "email",
+    "technique": "reversed_text",
+    "text_sent": "You can reach me at moc.elpmaxe@ahraf for anything urgent.",
+    "detected": false,
+    "layers_fired": [],
+    "risk_score": 0
+  },
+  {
+    "test_case": "email",
+    "technique": "base64_encoded",
+    "text_sent": "You can reach me at here's the value encoded: ZmFyaGFAZXhhbXBsZS5jb20= for anything urgent.",
+    "detected": true,
+    "layers_fired": [
+      "llm"
+    ],
+    "risk_score": 80
+  },
+  {
+    "test_case": "email",
+    "technique": "homoglyph_substitution",
+    "text_sent": "You can reach me at f\u0430rh\u0430@\u0435x\u0430mpl\u0435.c\u043em for anything urgent.",
+    "detected": true,
+    "layers_fired": [
+      "regex"
+    ],
+    "risk_score": 10
+  },
+  {
+    "test_case": "email",
+    "technique": "zero_width_injection",
+    "text_sent": "You can reach me at f\u200ba\u200br\u200bh\u200ba\u200b@\u200be\u200bx\u200ba\u200bm\u200bp\u200bl\u200be\u200b.\u200bc\u200bo\u200bm for anything urgent.",
+    "detected": true,
+    "layers_fired": [
+      "llm"
+    ],
+    "risk_score": 80
+  },
+  {
+    "test_case": "email",
+    "technique": "split_across_sentence",
+    "text_sent": "You can reach me at  for anything urgent. first part is farha@ex, and separately, the rest is ample.com",
+    "detected": true,
+    "layers_fired": [
+      "llm"
+    ],
+    "risk_score": 80
+  },
+  {
+    "test_case": "email_with_context",
+    "technique": "baseline (no obfuscation)",
+    "text_sent": "My email address is farha@example.com, feel free to reach out there.",
+    "detected": true,
+    "layers_fired": [
+      "regex"
+    ],
+    "risk_score": 10
+  },
+  {
+    "test_case": "email_with_context",
+    "technique": "spaced_out",
+    "text_sent": "My email address is f a r h a @ e x a m p l e . c o m, feel free to reach out there.",
+    "detected": true,
+    "layers_fired": [
+      "llm"
+    ],
+    "risk_score": 80
+  },
+  {
+    "test_case": "email_with_context",
+    "technique": "leetspeak",
+    "text_sent": "My email address is f4rh4@3x4mpl3.c0m, feel free to reach out there.",
+    "detected": true,
+    "layers_fired": [
+      "llm",
+      "regex"
+    ],
+    "risk_score": 100
+  },
+  {
+    "test_case": "email_with_context",
+    "technique": "dashes_to_dots",
+    "text_sent": "My email address is farha@example.com, feel free to reach out there.",
+    "detected": true,
+    "layers_fired": [
+      "regex"
+    ],
+    "risk_score": 10
+  },
+  {
+    "test_case": "email_with_context",
+    "technique": "dashes_removed",
+    "text_sent": "My email address is farha@example.com, feel free to reach out there.",
+    "detected": true,
+    "layers_fired": [
+      "regex"
+    ],
+    "risk_score": 10
+  },
+  {
+    "test_case": "email_with_context",
+    "technique": "reversed_text",
+    "text_sent": "My email address is moc.elpmaxe@ahraf, feel free to reach out there.",
+    "detected": false,
+    "layers_fired": [],
+    "risk_score": 0
+  },
+  {
+    "test_case": "email_with_context",
+    "technique": "base64_encoded",
+    "text_sent": "My email address is here's the value encoded: ZmFyaGFAZXhhbXBsZS5jb20=, feel free to reach out there.",
+    "detected": true,
+    "layers_fired": [
+      "llm"
+    ],
+    "risk_score": 80
+  },
+  {
+    "test_case": "email_with_context",
+    "technique": "homoglyph_substitution",
+    "text_sent": "My email address is f\u0430rh\u0430@\u0435x\u0430mpl\u0435.c\u043em, feel free to reach out there.",
+    "detected": true,
+    "layers_fired": [
+      "llm",
+      "regex"
+    ],
+    "risk_score": 100
+  },
+  {
+    "test_case": "email_with_context",
+    "technique": "zero_width_injection",
+    "text_sent": "My email address is f\u200ba\u200br\u200bh\u200ba\u200b@\u200be\u200bx\u200ba\u200bm\u200bp\u200bl\u200be\u200b.\u200bc\u200bo\u200bm, feel free to reach out there.",
+    "detected": true,
+    "layers_fired": [
+      "llm"
+    ],
+    "risk_score": 80
+  },
+  {
+    "test_case": "email_with_context",
+    "technique": "split_across_sentence",
+    "text_sent": "My email address is , feel free to reach out there. first part is farha@ex, and separately, the rest is ample.com",
+    "detected": true,
+    "layers_fired": [
+      "llm"
+    ],
+    "risk_score": 80
+  },
+  {
+    "test_case": "aws_key",
+    "technique": "baseline (no obfuscation)",
+    "text_sent": "The AWS access key for the staging bucket is AKIA1234567890ABCDEF.",
+    "detected": true,
+    "layers_fired": [
+      "llm",
+      "ner",
+      "regex"
+    ],
+    "risk_score": 100
+  },
+  {
+    "test_case": "aws_key",
+    "technique": "spaced_out",
+    "text_sent": "The AWS access key for the staging bucket is A K I A 1 2 3 4 5 6 7 8 9 0 A B C D E F.",
+    "detected": true,
+    "layers_fired": [
+      "llm",
+      "ner"
+    ],
+    "risk_score": 100
+  },
+  {
+    "test_case": "aws_key",
+    "technique": "leetspeak",
+    "text_sent": "The AWS access key for the staging bucket is 4K1412345678904BCD3F.",
+    "detected": true,
+    "layers_fired": [
+      "llm",
+      "ner"
+    ],
+    "risk_score": 100
+  },
+  {
+    "test_case": "aws_key",
+    "technique": "dashes_to_dots",
+    "text_sent": "The AWS access key for the staging bucket is AKIA1234567890ABCDEF.",
+    "detected": true,
+    "layers_fired": [
+      "llm",
+      "ner",
+      "regex"
+    ],
+    "risk_score": 100
+  },
+  {
+    "test_case": "aws_key",
+    "technique": "dashes_removed",
+    "text_sent": "The AWS access key for the staging bucket is AKIA1234567890ABCDEF.",
+    "detected": true,
+    "layers_fired": [
+      "llm",
+      "ner",
+      "regex"
+    ],
+    "risk_score": 100
+  },
+  {
+    "test_case": "aws_key",
+    "technique": "reversed_text",
+    "text_sent": "The AWS access key for the staging bucket is FEDCBA0987654321AIKA.",
+    "detected": true,
+    "layers_fired": [
+      "llm",
+      "ner"
+    ],
+    "risk_score": 100
+  },
+  {
+    "test_case": "aws_key",
+    "technique": "base64_encoded",
+    "text_sent": "The AWS access key for the staging bucket is here's the value encoded: QUtJQTEyMzQ1Njc4OTBBQkNERUY=.",
+    "detected": true,
+    "layers_fired": [
+      "llm",
+      "ner"
+    ],
+    "risk_score": 100
+  },
+  {
+    "test_case": "aws_key",
+    "technique": "homoglyph_substitution",
+    "text_sent": "The AWS access key for the staging bucket is \u0430KI\u04301234567890\u0430BCD\u0435F.",
+    "detected": true,
+    "layers_fired": [
+      "llm",
+      "ner"
+    ],
+    "risk_score": 100
+  },
+  {
+    "test_case": "aws_key",
+    "technique": "zero_width_injection",
+    "text_sent": "The AWS access key for the staging bucket is A\u200bK\u200bI\u200bA\u200b1\u200b2\u200b3\u200b4\u200b5\u200b6\u200b7\u200b8\u200b9\u200b0\u200bA\u200bB\u200bC\u200bD\u200bE\u200bF.",
+    "detected": true,
+    "layers_fired": [
+      "llm",
+      "ner"
+    ],
+    "risk_score": 100
+  },
+  {
+    "test_case": "aws_key",
+    "technique": "split_across_sentence",
+    "text_sent": "The AWS access key for the staging bucket is . first part is AKIA123456, and separately, the rest is 7890ABCDEF",
+    "detected": true,
+    "layers_fired": [
+      "llm",
+      "ner"
+    ],
+    "risk_score": 100
+  },
+  {
+    "test_case": "credit_card",
+    "technique": "baseline (no obfuscation)",
+    "text_sent": "Charge the card 4111111111111111 for this month's invoice.",
+    "detected": true,
+    "layers_fired": [
+      "llm",
+      "regex"
+    ],
+    "risk_score": 100
+  },
+  {
+    "test_case": "credit_card",
+    "technique": "spaced_out",
+    "text_sent": "Charge the card 4 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 for this month's invoice.",
+    "detected": true,
+    "layers_fired": [
+      "llm",
+      "regex"
+    ],
+    "risk_score": 100
+  },
+  {
+    "test_case": "credit_card",
+    "technique": "leetspeak",
+    "text_sent": "Charge the card 4111111111111111 for this month's invoice.",
+    "detected": true,
+    "layers_fired": [
+      "llm",
+      "regex"
+    ],
+    "risk_score": 100
+  },
+  {
+    "test_case": "credit_card",
+    "technique": "dashes_to_dots",
+    "text_sent": "Charge the card 4111111111111111 for this month's invoice.",
+    "detected": true,
+    "layers_fired": [
+      "llm",
+      "regex"
+    ],
+    "risk_score": 100
+  },
+  {
+    "test_case": "credit_card",
+    "technique": "dashes_removed",
+    "text_sent": "Charge the card 4111111111111111 for this month's invoice.",
+    "detected": true,
+    "layers_fired": [
+      "llm",
+      "regex"
+    ],
+    "risk_score": 100
+  },
+  {
+    "test_case": "credit_card",
+    "technique": "reversed_text",
+    "text_sent": "Charge the card 1111111111111114 for this month's invoice.",
+    "detected": true,
+    "layers_fired": [
+      "llm",
+      "regex"
+    ],
+    "risk_score": 100
+  },
+  {
+    "test_case": "credit_card",
+    "technique": "base64_encoded",
+    "text_sent": "Charge the card here's the value encoded: NDExMTExMTExMTExMTExMQ== for this month's invoice.",
+    "detected": true,
+    "layers_fired": [
+      "llm"
+    ],
+    "risk_score": 90
+  },
+  {
+    "test_case": "credit_card",
+    "technique": "homoglyph_substitution",
+    "text_sent": "Charge the card 4111111111111111 for this month's invoice.",
+    "detected": true,
+    "layers_fired": [
+      "llm",
+      "regex"
+    ],
+    "risk_score": 100
+  },
+  {
+    "test_case": "credit_card",
+    "technique": "zero_width_injection",
+    "text_sent": "Charge the card 4\u200b1\u200b1\u200b1\u200b1\u200b1\u200b1\u200b1\u200b1\u200b1\u200b1\u200b1\u200b1\u200b1\u200b1\u200b1 for this month's invoice.",
+    "detected": true,
+    "layers_fired": [
+      "llm"
+    ],
+    "risk_score": 100
+  },
+  {
+    "test_case": "credit_card",
+    "technique": "split_across_sentence",
+    "text_sent": "Charge the card  for this month's invoice. first part is 41111111, and separately, the rest is 11111111",
+    "detected": true,
+    "layers_fired": [
+      "llm"
+    ],
+    "risk_score": 90
+  }
+]

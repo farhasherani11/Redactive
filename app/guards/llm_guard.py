@@ -46,11 +46,23 @@ Respond ONLY with valid JSON, no other text, in this exact shape:
   "flagged_phrases": ["<short exact phrase from the text>", ...]
 }
 
-If nothing context-dependent is risky, return risk_score 0, a short \
-explanation saying why, and an empty flagged_phrases list. Do not repeat \
-findings that a simple regex or entity scanner would already catch on its \
-own (plain emails, phone numbers, isolated names) unless they are made \
-risky specifically by the surrounding context."""
+Do not repeat findings that are already unambiguous and cleanly formatted \
+(a plain, correctly-formatted email address or phone number sitting in \
+ordinary text) — a simple scanner already catches those reliably, so \
+re-flagging them adds no value.
+
+However — this is important — if something in the text LOOKS like it might \
+be a disguised, obfuscated, or broken-up version of sensitive data (unusual \
+spacing between characters, reversed text, encoded-looking strings, letters \
+replaced with numbers or lookalike symbols, a value split across two parts \
+of the message), you should flag it even if you cannot be fully certain \
+what it decodes to. A simple pattern scanner cannot see through obfuscation \
+at all, so for anything that looks deliberately disguised, you are likely \
+the only layer that can catch it — treat that uncertainty as a reason to \
+flag, not a reason to stay silent.
+
+If nothing risky is present at all, return risk_score 0, a short \
+explanation saying why, and an empty flagged_phrases list."""
 
 
 def scan_llm(text: str) -> dict:
