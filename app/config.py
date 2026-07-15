@@ -17,6 +17,12 @@ load_dotenv()
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
 
+# The key clients must send in the X-API-Key header to use /analyze.
+# If left empty, auth is effectively disabled (useful for local dev) —
+# but a warning is logged so this is never accidentally left open in
+# production.
+REDACTIVE_API_KEY = os.getenv("REDACTIVE_API_KEY", "")
+
 # Model used for the LLM guard layer. Kept as a config value, not
 # hardcoded in llm_guard.py, so it's a one-line change to swap models.
 LLM_MODEL = os.getenv("LLM_MODEL", "llama-3.3-70b-versatile")
