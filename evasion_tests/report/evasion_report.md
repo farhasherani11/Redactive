@@ -43,7 +43,7 @@
 | email | split_across_sentence | ✅ | llm | 80 |
 | email_with_context | baseline (no obfuscation) | ✅ | regex | 10 |
 | email_with_context | spaced_out | ✅ | llm | 80 |
-| email_with_context | leetspeak | ✅ | llm, regex | 100 |
+| email_with_context | leetspeak | ✅ | llm, regex | 90 |
 | email_with_context | dashes_to_dots | ✅ | regex | 10 |
 | email_with_context | dashes_removed | ✅ | regex | 10 |
 | email_with_context | reversed_text | ❌ | - | 0 |

@@ -84,6 +84,7 @@ def scan_llm(text: str) -> dict:
     response = _client.chat.completions.create(
         model=LLM_MODEL,
         max_tokens=500,
+        temperature=0,
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": text},

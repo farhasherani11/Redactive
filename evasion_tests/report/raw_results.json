@@ -228,7 +228,7 @@
       "llm",
       "regex"
     ],
-    "risk_score": 100
+    "risk_score": 90
   },
   {
     "test_case": "email_with_context",
