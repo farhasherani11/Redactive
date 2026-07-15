@@ -20,17 +20,24 @@ quota or hammer the service. Two layers here, checked in order:
 
 import time
 from collections import defaultdict, deque
-from fastapi import Header, HTTPException
+from fastapi import HTTPException, Security
+from fastapi.security import APIKeyHeader
 from app.config import REDACTIVE_API_KEY
 
 RATE_LIMIT = 30
 RATE_LIMIT_WINDOW_SECONDS = 60
 
+# Using FastAPI's APIKeyHeader (rather than a plain Header parameter)
+# registers this properly as a security scheme in the OpenAPI spec — this
+# is what makes Swagger UI show the "Authorize" lock icon, letting you
+# enter the key once instead of manually adding it to every request.
+_api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
+
 # Maps API key -> deque of request timestamps within the current window.
 _request_log: dict[str, deque] = defaultdict(deque)
 
 
-def verify_api_key(x_api_key: str = Header(default=None)) -> str:
+def verify_api_key(x_api_key: str = Security(_api_key_header)) -> str:
     """
     FastAPI dependency. Raises 401 if the key is missing/wrong, raises 429
     if the key is valid but over the rate limit. Returns the key on success
