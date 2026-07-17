@@ -1,100 +1,132 @@
-# Redactive — DLP Classifier API (Step 4: Combine + Redact)
+# Redactive
 
-An LLM-powered Data Loss Prevention classifier, built in layers.
-Findings from all three guards now get merged, deduplicated, and used to
-produce a redacted version of the input text — not just a list of what's risky.
+**An LLM-powered Data Loss Prevention (DLP) system** — a three-layer
+detection API (regex + NER + LLM), validated against a self-built
+adversarial evasion suite, deployed live, and wired into a Chrome
+extension that warns you before you paste sensitive data anywhere on
+the web.
 
-## What's here
+🔗 **Live API:** https://redactive.onrender.com
+ **Interactive docs:** https://redactive.onrender.com/docs
+ **Full architecture + findings:** [ARCHITECTURE.md](./ARCHITECTURE.md)
+📊 **Evasion test results:** [evasion_tests/report/evasion_report.md](./evasion_tests/report/evasion_report.md)
+
+> First request after inactivity may take 30-60s — deployed on Render's
+> free tier, which spins down idle instances. Every request after that is
+> fast.
+
+---
+
+## What it does
+
+Send it text, it tells you what's sensitive, why, and gives you back a
+redacted-safe version:
+
+```bash
+curl -X POST https://redactive.onrender.com/analyze \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: your-key-here" \
+  -d '{"text": "My SSN is 123-45-6789, please keep this confidential."}'
+```
+
+```json
+{
+  "redacted_text": "My [REDACTED_SSN], please keep this confidential.",
+  "risk_score": 100,
+  "llm_review": {
+    "explanation": "Contains a Social Security Number paired with an explicit confidentiality instruction."
+  }
+}
+```
+
+## Headline result
+
+**94% detection rate** against an adversarial test suite of 10 obfuscation
+techniques (leetspeak, spacing, base64, reversal, zero-width injection,
+homoglyphs, and more) — up from a 62.5% baseline using pattern-matching
+alone. Full investigation, including two disproven hypotheses and the
+actual root causes, in [ARCHITECTURE.md](./ARCHITECTURE.md).
+
+## Architecture
+
+```
+Text ─▶ Regex ─▶ NER ─▶ Cascade decision ─▶ LLM (Groq) ─▶ Combine ─▶ Redact
+                              │
+                    skips LLM only when
+                    nothing regex/NER
+                    found AND no risk
+                    language present
+```
+
+Three layers because each catches what the others structurally can't:
+- **Regex** — fast, cheap, catches fixed-format data (SSNs, cards, keys)
+- **NER** (spaCy) — catches free-form entities with no fixed pattern
+- **LLM** (Groq, Llama 3.3 70B) — the only layer with real judgment;
+  catches purely contextual risk ("our revenue is $4.2M, don't share this")
+
+## Repo structure
 
 ```
 app/
-  main.py                 -> FastAPI app (Redactive), /analyze and /health
-  config.py                -> loads GROQ_API_KEY and model name from .env
-  models/
-    schemas.py              -> shared request/response models
-  guards/
-    regex_guard.py          -> Guard 1: pattern matching (SSN, credit cards,
-                                emails, phone numbers, AWS keys, IPv4, etc.)
-    ner_guard.py             -> Guard 2: spaCy NER (names, orgs, locations,
-                                money mentions, nationalities/groups)
-    llm_guard.py              -> Guard 3: Groq LLM contextual review — risk
-                                score, plain-English explanation, flagged phrases
-  pipeline/
-    combine.py                 -> merges + deduplicates findings across guards
-  redaction/
-    redactor.py                  -> builds a redacted version of the text
-requirements.txt
-.env.example
+  guards/       regex_guard.py, ner_guard.py, llm_guard.py
+  pipeline/      combine.py, cascade.py
+  redaction/      redactor.py
+  auth/            api_key.py — X-API-Key auth + rate limiting
+  models/           schemas.py
+  main.py, config.py
+
+evasion_tests/    adversarial test suite + generated report
+extension/        Chrome extension (Manifest V3)
+Dockerfile         for Render/Railway deployment
 ```
-
-## Install
-
-No new dependencies for Step 4 — same install as Step 3:
-
-```bash
-pip install --only-binary :all: -r requirements.txt
-```
-
-## Set up your API key (Groq — free, no credit card)
-
-1. Copy `.env.example` to a new file named `.env` in the project root
-2. Get a free key at https://console.groq.com/keys
-3. Paste it in: `GROQ_API_KEY=gsk_...`
-
-**Without a key set, the app still runs fine** — the LLM guard returns
-`"enabled": false` and an explanation instead of crashing, so regex + NER
-+ redaction keep working on their own.
 
 ## Run it locally
 
 ```bash
+pip install --only-binary :all: -r requirements.txt
+python -m spacy download en_core_web_sm
+cp .env.example .env   # add your GROQ_API_KEY (free at console.groq.com/keys)
 python -m uvicorn app.main:app --reload
 ```
 
-Visit http://localhost:8000/docs and test `/analyze`:
+Visit `http://localhost:8000/docs` to try it. Without a `GROQ_API_KEY` set,
+the app still runs — the LLM guard reports itself disabled and regex/NER
+keep working on their own.
 
-```json
-{"text": "My SSN is 123-45-6789 and I work with Rohan Mehta at Skyhigh Security."}
+## Run the evasion suite yourself
+
+```bash
+python -m evasion_tests.run_evasion_suite
+python -m evasion_tests.generate_report
 ```
 
-## What's new in Step 4
+Regenerates `evasion_tests/report/evasion_report.md` against your local
+server — useful after changing any guard's logic to confirm nothing
+regressed (this is exactly how a real cascade-logic regression was caught
+during development — see ARCHITECTURE.md, section 4).
 
-The response now includes `redacted_text` — a safe version of the input
-with every flagged span replaced by a labeled placeholder:
+## Install the Chrome extension
 
-```json
-{
-  "original_text": "My SSN is 123-45-6789 and I work with Rohan Mehta at Skyhigh Security.",
-  "redacted_text": "My [REDACTED_ORG] is [REDACTED_SSN] and I work with [REDACTED_PERSON] at [REDACTED_ORG].",
-  "findings": [...],
-  "risk_score": 75,
-  "layers_used": ["regex", "ner", "llm"],
-  "llm_review": {...}
-}
-```
+1. Go to `chrome://extensions`, enable **Developer mode**
+2. Click **Load unpacked**, select the `extension/` folder
+3. Click the extension icon, paste your Redactive API key, save
+4. Type sensitive-looking text into any webpage's text field — a warning
+   banner appears if it's flagged
 
-Two things worth understanding about how this works:
+Works on any web-based text field (Gmail, Slack web, ChatGPT, Notion,
+Google Docs). Doesn't work in native desktop apps (Word, Outlook desktop)
+— a hard platform boundary for browser extensions, not a bug.
 
-- **`combine.py`** deduplicates overlapping findings from different guards
-  (e.g. if regex and NER both flag overlapping spans, the higher-severity
-  finding wins and the other is dropped) before anything gets redacted.
-- **`redactor.py`** replaces spans starting from the end of the string
-  backward, so earlier replacements don't shift the character positions
-  of findings still waiting to be redacted.
+## Security
 
-**Known limitation worth knowing about:** you may notice the word "SSN"
-itself sometimes gets misread by the NER model as an organization name
-(`ner_org`) and gets redacted too, producing slightly odd output like
-`"My [REDACTED_ORG] is [REDACTED_SSN]..."`. This is a real spaCy false
-positive, not a bug in the redaction logic — and it's a good concrete
-example to have on hand when you build the evasion/false-positive report
-in a later step.
+- Every `/analyze` call requires a valid `X-API-Key` header
+- Rate limited: 30 requests / 60 seconds per key
+- Secrets are never committed — `.env` is gitignored; production keys are
+  set directly as environment variables on Render
 
-## What's next
+## What's deliberately not built
 
-- Cascade logic: only call the LLM when regex/NER already found something
-  borderline, to save cost and latency
-- Adversarial evasion test suite: systematically try to fool the classifier
-  with obfuscated inputs, measure detection rate per layer
-- Deploy to Render/Railway, add API key auth
-- Chrome extension client
+Policy-as-code, an admin dashboard, and a feedback loop were all
+considered early and deprioritized in favor of going deep on evasion
+testing and cascade logic instead — see [ARCHITECTURE.md, section 7](./ARCHITECTURE.md#7-whats-deliberately-not-built-and-why)
+for the full reasoning.
