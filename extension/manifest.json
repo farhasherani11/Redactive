@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Redactive — DLP Guard",
+  "version": "1.0.0",
+  "description": "Live warns you before you paste or type sensitive data into any webpage — powered by Redactive's regex + NER + LLM detection pipeline.",
+
+  "permissions": ["storage"],
+  "host_permissions": ["https://redactive.onrender.com/*"],
+
+  "background": {
+    "service_worker": "background.js"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content_script.js"],
+      "run_at": "document_idle"
+    }
+  ],
+
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Redactive DLP Guard"
+  }
+}
