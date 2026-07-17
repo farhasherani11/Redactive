@@ -4,6 +4,12 @@
   "version": "1.0.0",
   "description": "Live warns you before you paste or type sensitive data into any webpage — powered by Redactive's regex + NER + LLM detection pipeline.",
 
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+
   "permissions": ["storage"],
   "host_permissions": ["https://redactive.onrender.com/*"],
 
@@ -21,6 +27,11 @@
 
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Redactive DLP Guard"
+    "default_title": "Redactive DLP Guard",
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
   }
 }
